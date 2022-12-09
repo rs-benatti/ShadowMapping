@@ -13,8 +13,12 @@ uniform LightSource lightSources[3];
 
 struct Material {
   vec3 albedo;
+
   sampler2D normalMap;
   bool hasNormalMap;
+
+  sampler2D textureMap;
+  bool hasTextureMap;
   // TODO: textures
 };
 
@@ -39,7 +43,7 @@ void main() {
     // transform normal vector to range [-1,1]
     n = normalize(n * 2.0 - 1.0); 
   } 
-  
+
   vec3 wo = normalize(camPos - fPosition); // unit vector pointing to the camera
 
   vec3 radiance = vec3(0, 0, 0);
@@ -49,6 +53,9 @@ void main() {
       vec3 wi = normalize(a_light.position - fPosition); // unit vector pointing to the light
       vec3 Li = a_light.color*a_light.intensity;
       vec3 albedo = material.albedo;
+      if (material.hasTextureMap){
+        albedo = texture(material.textureMap, fTexCoord).rgb;
+      }
 
       radiance += Li*albedo*max(dot(n, wi), 0);
     }

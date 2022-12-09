@@ -76,7 +76,11 @@ unsigned int g_availableTextureSlot = 0;
 
 
 GLuint backWallTexID;
-int backWallTexID_GPU;
+int backWallTexShaderLocation = 0;
+
+GLuint backWallTexColorID;
+int backWallTexColorShaderLocation = 0;
+
 
 GLuint loadTextureFromFileToGPU(const std::string &filename)
 {
@@ -301,14 +305,17 @@ struct Scene {
 
     // back-wall
     mainShader->set("material.albedo", glm::vec3(0.29, 0.51, 0.82)); // default value if the texture was not loaded
+    mainShader->set("material.hasTextureMap", 1);
+    mainShader->set("material.textureMap", backWallTexColorShaderLocation);
     mainShader->set("modelMat", planeMat);
     mainShader->set("normMat", glm::mat3(glm::inverseTranspose(planeMat)));
     mainShader->set("material.hasNormalMap", 1);
-    mainShader->set("material.normalMap", backWallTexID_GPU);
+    mainShader->set("material.normalMap", backWallTexShaderLocation);
     plane->render();
 
     // floor
     mainShader->set("material.albedo", glm::vec3(0.8, 0.8, 0.9));
+    mainShader->set("material.hasTextureMap", 0);
     mainShader->set("modelMat", floorMat);
     mainShader->set("normMat", glm::mat3(glm::inverseTranspose(floorMat)));
     mainShader->set("material.hasNormalMap", 0);
@@ -316,6 +323,7 @@ struct Scene {
 
     // rhino
     mainShader->set("material.albedo", glm::vec3(1, 0.71, 0.29));
+    mainShader->set("material.hasTextureMap", 0);
     mainShader->set("modelMat", rhinoMat);
     mainShader->set("normMat", glm::mat3(glm::inverseTranspose(rhinoMat)));
     mainShader->set("material.hasNormalMap", 0);
@@ -528,9 +536,17 @@ void initScene(const std::string &meshFilename)
 
   // TODO: Load and setup textures
   backWallTexID = loadTextureFromFileToGPU("data/normal.png");
-  backWallTexID_GPU = g_availableTextureSlot; ++g_availableTextureSlot;
-  glActiveTexture(GL_TEXTURE0 + backWallTexID_GPU);
+  backWallTexColorID = loadTextureFromFileToGPU("data/color.png");
+  backWallTexShaderLocation = g_availableTextureSlot; 
+  g_availableTextureSlot = g_availableTextureSlot + 1;
+  glActiveTexture(GL_TEXTURE0 + backWallTexShaderLocation);
   glBindTexture(GL_TEXTURE_2D, backWallTexID);
+
+  
+  backWallTexColorShaderLocation = g_availableTextureSlot; 
+  g_availableTextureSlot = g_availableTextureSlot + 1;
+  glActiveTexture(GL_TEXTURE0 + backWallTexColorShaderLocation);
+  glBindTexture(GL_TEXTURE_2D, backWallTexColorID);
 
   // Setup lights
   const glm::vec3 pos[3] = {
