@@ -6,11 +6,13 @@ layout(location=2) in vec2 vTexCoord;
 
 uniform mat4 modelMat, viewMat, projMat;
 uniform mat3 normMat;
+uniform mat4 shadowMVP[3];
 
 out vec3 fPositionModel;
 out vec3 fPosition;
 out vec3 fNormal;
 out vec2 fTexCoord;
+out vec4 posLightSpace[3];
 
 void main() {
   fPositionModel = vPosition;
@@ -18,5 +20,9 @@ void main() {
   fNormal = normMat*vNormal;
   fTexCoord = vTexCoord;
 
+  for (int i = 0; i < 3; i++){
+    posLightSpace[i] = shadowMVP[i]*modelMat*vec4(vPosition, 1.0);
+  }
+  
   gl_Position =  projMat*viewMat*modelMat*vec4(vPosition, 1.0); // mandatory
 }

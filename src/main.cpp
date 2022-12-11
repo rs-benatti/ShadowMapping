@@ -211,7 +211,7 @@ private:
 struct Light {
   FboShadowMap shadowMap;
   glm::mat4 depthMVP;
-  unsigned int shadowMapTexOnGPU;
+  int shadowMapTexOnGPU;
 
   glm::vec3 position;
   glm::vec3 color;
@@ -310,6 +310,8 @@ struct Scene {
       mainShader->set(std::string("lightSources[")+std::to_string(i)+std::string("].color"), light.color);
       mainShader->set(std::string("lightSources[")+std::to_string(i)+std::string("].intensity"), light.intensity);
       mainShader->set(std::string("lightSources[")+std::to_string(i)+std::string("].isActive"), 1);
+      mainShader->set(std::string("shadowMaps[") + std::to_string(i) + std::string("].shadowMapVal"), light.shadowMapTexOnGPU);
+      mainShader->set(std::string("shadowMVP[") + std::to_string(i) + std::string("]"), light.depthMVP);
     }
 
     // back-wall
