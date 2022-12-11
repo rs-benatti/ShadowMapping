@@ -223,6 +223,14 @@ struct Light {
     const float scene_radius)
   {
     // TODO: compute the MVP matrix from the light's point of view
+      float near = 0.01f, far = 10.0f;
+
+      glm::mat4 lightProjection, lightView, modelMatrix;
+
+      lightProjection = glm::ortho(-scene_radius, scene_radius,-scene_radius, scene_radius, near, far);
+      lightView = glm::lookAt(position, scene_center, glm::vec3(0.0, 1.0, 0.0));
+      depthMVP = lightProjection * lightView;
+      shader_shadow_map_Ptr->set("depthMVP", depthMVP);
   }
 
   void allocateShadowMapFbo(unsigned int w=800, unsigned int h=600)
@@ -263,7 +271,7 @@ struct Scene {
     //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     // TODO: first, render the shadow maps
     glEnable(GL_CULL_FACE);
-
+    glCullFace(GL_FRONT);
     shadomMapShader->use();
     for(int i=0; i<lights.size(); ++i) {
       Light &light = lights[i];
@@ -271,7 +279,8 @@ struct Scene {
       light.bindShadowMap();
 
       // TODO: render the objects in the scene
-
+      shadomMapShader->set("model", rhinoMat);
+      rhino->render();
       if(saveShadowMapsPpm) {
         light.shadowMap.savePpmFile(std::string("shadom_map_")+std::to_string(i)+std::string(".ppm"));
       }
